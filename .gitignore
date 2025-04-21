@@ -1,0 +1,4 @@
+# Ignore all files and subfolders in the folder
+apriltag-imgs/
+
+# Replace 'folder_name' with the name of the folder you want to ignore
