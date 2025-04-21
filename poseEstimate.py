@@ -8,12 +8,13 @@ camera_matrix = data["cameraMatrix"]
 dist_coeffs = data["distCoeffs"]
 
 # Setup ArUco
-aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
+aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_APRILTAG_36H11)
 parameters = cv2.aruco.DetectorParameters()
 
 marker_length = 0.05  # meter
 
-cap = cv2.VideoCapture(0)
+# cap = cv2.VideoCapture(2)
+cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
 def get_camera_pose(rvec, tvec):
     R, _ = cv2.Rodrigues(rvec)
