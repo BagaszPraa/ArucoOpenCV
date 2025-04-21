@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 
-filename = "c922_dataCalib.npz"
 # Ukuran checkerboard (jumlah sudut dalam baris & kolom, bukan jumlah kotak)
 CHECKERBOARD = (9, 6)  # artinya 10x7 kotak
 SQUARE_SIZE = 0.025  # ukuran sisi kotak dalam meter (misalnya 2.5 cm)
@@ -9,16 +8,22 @@ SQUARE_SIZE = 0.025  # ukuran sisi kotak dalam meter (misalnya 2.5 cm)
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
 # Persiapkan object points seperti (0,0,0), (1,0,0), ..., dalam satuan meter
-objp = np.zeros((CHECKERBOARD[0]*CHECKERBOARD[1], 3), np.float32)
+objp = np.zeros((CHECKERBOARD[0] * CHECKERBOARD[1], 3), np.float32)
 objp[:, :2] = np.mgrid[0:CHECKERBOARD[0], 0:CHECKERBOARD[1]].T.reshape(-1, 2)
 objp *= SQUARE_SIZE
 
 objpoints = []  # Titik 3D di dunia nyata
 imgpoints = []  # Titik 2D di image
 
-cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+# Buka video untuk kalibrasi
+video_path = "video.mp4"  # Ganti dengan path video Anda
+cap = cv2.VideoCapture(video_path)
 
-print("🔧 Tekan [SPACE] untuk ambil gambar, [ESC] untuk kalibrasi dan keluar.")
+if not cap.isOpened():
+    print("❌ Tidak dapat membuka video.")
+    exit()
+
+print("🔧 Memproses video untuk kalibrasi...")
 
 while True:
     ret, frame = cap.read()
@@ -30,23 +35,19 @@ while True:
 
     if found:
         cv2.drawChessboardCorners(frame, CHECKERBOARD, corners, found)
-
-    cv2.imshow("Kalibrasi Kamera", frame)
-    key = cv2.waitKey(1)
-
-    if key == 27:  # ESC
-        break
-    elif key == 32 and found:  # SPACE
-        print("✅ Gambar ditambahkan")
         objpoints.append(objp)
         corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
         imgpoints.append(corners2)
+
+    cv2.imshow("Kalibrasi Kamera", frame)
+    if cv2.waitKey(1) == 27:  # Tekan ESC untuk keluar
+        break
 
 cap.release()
 cv2.destroyAllWindows()
 
 if len(objpoints) < 5:
-    print("❌ Tidak cukup gambar untuk kalibrasi. Minimal 5.")
+    print("❌ Tidak cukup frame untuk kalibrasi. Minimal 5.")
     exit()
 
 print("🧮 Mengkalibrasi kamera...")
@@ -69,5 +70,5 @@ for i in range(len(objpoints)):
 print("🔍 Reprojection error rata-rata: {:.4f}".format(total_error / len(objpoints)))
 
 # Simpan hasil kalibrasi
-np.savez(filename, cameraMatrix=cameraMatrix, distCoeffs=distCoeffs)
-print(f"\n💾 Data disimpan ke {filename}")
+np.savez("calibration_data.npz", cameraMatrix=cameraMatrix, distCoeffs=distCoeffs)
+print("\n💾 Data disimpan ke calibration_data.npz")
