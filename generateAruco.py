@@ -11,7 +11,7 @@ os.makedirs(output_folder, exist_ok=True)
 aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
 
 # Generate a marker
-marker_id = 0
+marker_id = 4
 marker_size = 200  # Size in pixels
 marker_image = cv2.aruco.generateImageMarker(aruco_dict, marker_id, marker_size)
 
